@@ -12,6 +12,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,9 +43,43 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-
+                matrikelnummerServer();
             }
         });
 
+    }
+    public void matrikelnummerServer(){
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                String matNr = matNrInput.getText().toString();
+                try {
+                    socket = new Socket("se2-submission.aau.at", 20080);// Verbindung zu Netzwerk herstellen
+
+                    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    out.write(matNr);
+                    out.close();
+
+                    String messageFromServer = in.readLine();
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            serverResponse.setText(messageFromServer);
+                        }
+                    });
+
+                    in.close();
+                    out.close();
+                    socket.close();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
     }
 }
