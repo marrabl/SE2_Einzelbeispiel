@@ -18,12 +18,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
     EditText matNrInput;
     TextView serverResponse;
+    TextView ausgabeBerechnung;
+    TextView sortedHint;
     Socket socket;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
         });
         matNrInput = findViewById(R.id.inputMatrikelnummer);
         serverResponse = findViewById(R.id.textViewSever);
+        ausgabeBerechnung = findViewById(R.id.textViewBerechnung);
+        sortedHint = findViewById(R.id.textViewSorted);
 
         Button btnAbschicken = findViewById(R.id.buttonAbschicken);
         btnAbschicken.setOnClickListener(new View.OnClickListener() {
@@ -44,6 +50,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 matrikelnummerServer();
+            }
+        });
+
+        Button btnBerechne = findViewById(R.id.buttonBerechne);
+        btnBerechne.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sortMatrikelnummer();
             }
         });
 
@@ -81,5 +95,36 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         thread.start();
+    }
+    public void sortMatrikelnummer() {
+
+        String matNr = matNrInput.getText().toString();
+
+        char[] ziffern = matNr.toCharArray();
+
+        StringBuilder geradeZahlen = new StringBuilder();
+        StringBuilder ungeradeZahlen = new StringBuilder();
+
+        for (char ziffer : ziffern) {
+            int num = Character.getNumericValue(ziffer);
+            if (num % 2 == 0) {
+                geradeZahlen.append(ziffer);
+            } else {
+                ungeradeZahlen.append(ziffer);
+            }
+        }
+
+        char[] sortedGerade = geradeZahlen.toString().toCharArray();
+        Arrays.sort(sortedGerade);
+        char[] sortedUngerade = ungeradeZahlen.toString().toCharArray();
+        Arrays.sort(sortedUngerade);
+
+        StringBuilder sortedMatrikelnummer = new StringBuilder();
+        sortedMatrikelnummer.append(sortedGerade);
+        sortedMatrikelnummer.append(sortedUngerade);
+
+        ausgabeBerechnung.setText(sortedMatrikelnummer);
+        sortedHint.setText("Sortierte Matrikelnummer:");
+
     }
 }
