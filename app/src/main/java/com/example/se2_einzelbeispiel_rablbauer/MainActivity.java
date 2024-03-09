@@ -1,6 +1,7 @@
 package com.example.se2_einzelbeispiel_rablbauer;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,8 +26,9 @@ public class MainActivity extends AppCompatActivity {
     EditText matNrInput;
     TextView serverResponse;
     TextView ausgabeBerechnung;
+    TextView serverResponseHint;
     TextView sortedHint;
-    Socket socket;
+    //Socket socket;
 
 
     @Override
@@ -43,10 +45,10 @@ public class MainActivity extends AppCompatActivity {
         serverResponse = findViewById(R.id.textViewSever);
         ausgabeBerechnung = findViewById(R.id.textViewBerechnung);
         sortedHint = findViewById(R.id.textViewSorted);
+        serverResponseHint = findViewById(R.id.textViewServerResponse);
 
         Button btnAbschicken = findViewById(R.id.buttonAbschicken);
         btnAbschicken.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 matrikelnummerServer();
@@ -60,42 +62,45 @@ public class MainActivity extends AppCompatActivity {
                 sortMatrikelnummer();
             }
         });
-
     }
-    public void matrikelnummerServer(){
-        Thread thread = new Thread(new Runnable() {
 
+    public void matrikelnummerServer() {
+        String matNr = matNrInput.getText().toString();
+        String host = "se2-submission.aau.at";
+        int port = 20080;
+        new Thread(new Runnable() {
             @Override
             public void run() {
-                String matNr = matNrInput.getText().toString();
                 try {
-                    socket = new Socket("se2-submission.aau.at", 20080);// Verbindung zu Netzwerk herstellen
-
+                    Socket socket = new Socket(host, port);            // Verbindung zu Netzwerk herstellen
                     BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
                     out.write(matNr);
-                    out.close();
+                    out.newLine();
+                    out.flush();
 
                     String messageFromServer = in.readLine();
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            serverResponseHint.setText("Server Antwort:");
                             serverResponse.setText(messageFromServer);
                         }
                     });
-
-                    in.close();
                     out.close();
+                    in.close();
                     socket.close();
 
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
+                    Log.e("MainActivity", "Fehler beim Verbinden mit dem Server: " + e.getMessage());
                 }
             }
-        });
-        thread.start();
+        }).start();
     }
+
     public void sortMatrikelnummer() {
 
         String matNr = matNrInput.getText().toString();
