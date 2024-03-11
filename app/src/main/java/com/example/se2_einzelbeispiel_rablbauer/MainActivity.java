@@ -1,8 +1,6 @@
 package com.example.se2_einzelbeispiel_rablbauer;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -23,13 +21,12 @@ import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Initialsierung
+    // Initialisierung
     EditText matNrInput;
     TextView serverResponse;
     TextView ausgabeBerechnung;
     TextView serverResponseHint;
     TextView sortedHint;
-    //Socket socket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,65 +48,54 @@ public class MainActivity extends AppCompatActivity {
 
         // Binding der Buttons
         Button btnAbschicken = findViewById(R.id.buttonAbschicken);
-        btnAbschicken.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                matrikelnummerServer();         // wenn Button geklickt wird, wird die Methode matrikelnummerServer() aufgerufen
-            }
+        btnAbschicken.setOnClickListener(v -> {
+            matrikelnummerServer();         // wenn Button geklickt wird, wird die Methode matrikelnummerServer() aufgerufen
         });
 
         Button btnBerechne = findViewById(R.id.buttonBerechne);
-        btnBerechne.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sortMatrikelnummer();           // wenn Button geklickt wird, wird die Methode sortMatrikelnummer aufgerufen
-            }
+        btnBerechne.setOnClickListener(v -> {
+            sortMatrikelnummer();           // wenn Button geklickt wird, wird die Methode sortMatrikelnummer aufgerufen
         });
     }
 
     // Methode zur Kommunikation mit dem Server
     public void matrikelnummerServer() {
+        String outputHeadline = "Server Antwort:";
         String matNr = matNrInput.getText().toString();     // Input vom TextInputEditText View einlesen und in String konvertieren für spätere Übergabe
         String host = "se2-submission.aau.at";              // Server host
         int port = 20080;                                   // Port des Servers
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Socket socket = new Socket(host, port);                                                         // Verbindung zu Netzwerk herstellen
-                    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));      // Output, Nachricht an Server im Bytestream
-                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));         // Input, Nachricht von Server im Bytestream
+        new Thread(() -> {
+            try {
+                Socket socket = new Socket(host, port);                                                         // Verbindung zu Netzwerk herstellen
+                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));      // Output, Nachricht an Server im Bytestream
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));         // Input, Nachricht von Server im Bytestream
 
-                    out.write(matNr);       // Übergeben der Matrikelnummer
-                    out.newLine();          // Leerzeichen, um ende der Übergabe zu markieren
-                    out.flush();            // Leeren
+                out.write(matNr);       // Übergeben der Matrikelnummer
+                out.newLine();          // Leerzeichen, um ende der Übergabe zu markieren
+                out.flush();            // Leeren
 
-                    String messageFromServer = in.readLine();       // Nachricht von Server empfangen
+                String messageFromServer = in.readLine();       // Nachricht von Server empfangen
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            serverResponseHint.setText("Server Antwort:");      // Textviews anpassen
-                            serverResponse.setText(messageFromServer);          // Textview ändert sich zu Nachricht des Servers
-                        }
-                    });
+                runOnUiThread(() -> {
+                    serverResponseHint.setText(outputHeadline);      // Textviews anpassen
+                    serverResponse.setText(messageFromServer);          // Textview ändert sich zu Nachricht des Servers
+                });
 
-                    out.close();        // OutputStream schließen
-                    in.close();         // InputStream schließen
-                    socket.close();     // Socket schließen
+                out.close();        // OutputStream schließen
+                in.close();         // InputStream schließen
+                socket.close();     // Socket schließen
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e("MainActivity", "Fehler beim Verbinden mit dem Server: " + e.getMessage());
-                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }).start();
     }
 
     // Methode zur individuellen Aufgabe; Matrikelnummer sortieren, zuerst gerade Zahlen reihen, danach ungerade Zahlen
     public void sortMatrikelnummer() {
-        String matNr = matNrInput.getText().toString();     // Input von View
-        char[] ziffern = matNr.toCharArray();               // Input in Chararray speichern
+        String outputHeadline = "Sortierte Matrikelnummer:";    // Output Überschrift
+        String matNr = matNrInput.getText().toString();         // Input von View
+        char[] ziffern = matNr.toCharArray();                   // Input in Chararray speichern
 
         StringBuilder geradeZahlen = new StringBuilder();       // Stringbuilder um Teilstrings zu erstellen
         StringBuilder ungeradeZahlen = new StringBuilder();
@@ -133,6 +119,6 @@ public class MainActivity extends AppCompatActivity {
         sortedMatrikelnummer.append(sortedUngerade);
 
         ausgabeBerechnung.setText(sortedMatrikelnummer);                // Textview anpassen
-        sortedHint.setText("Sortierte Matrikelnummer:");
+        sortedHint.setText(outputHeadline);
     }
 }
