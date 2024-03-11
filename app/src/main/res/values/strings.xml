@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SE2_Einzelbeispiel_Rablbauer</string>
+    <string name="gib_eine_matrikelnummer_ein">Gib eine Matrikelnummer ein:</string>
+    <string name="matrikelnummer">Matrikelnummer</string>
+    <string name="abschicken">ABSCHICKEN</string>
+    <string name="berechne">BERECHNE</string>
 </resources>
